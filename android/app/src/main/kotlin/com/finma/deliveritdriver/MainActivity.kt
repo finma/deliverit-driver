@@ -1,4 +1,4 @@
-package com.finma.deliveritdriver.deliverit_driver
+package com.finma.deliveritdriver
 
 import io.flutter.embedding.android.FlutterActivity
 
