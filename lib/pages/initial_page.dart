@@ -62,7 +62,7 @@ class InitialPage extends StatelessWidget {
 
               ButtonCustom(
                 label: 'MASUK',
-                onTap: () => context.pushNamed(Routes.signin),
+                onTap: () => context.goNamed(Routes.signin),
               ),
               const SizedBox(height: 16),
 

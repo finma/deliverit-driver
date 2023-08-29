@@ -19,7 +19,7 @@ final router = GoRouter(
       builder: (context, state) => InitialPage(),
       routes: [
         GoRoute(
-          path: '/signin',
+          path: 'signin',
           name: Routes.signin,
           builder: (context, state) => SignInPage(),
         ),
