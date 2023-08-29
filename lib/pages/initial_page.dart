@@ -69,7 +69,7 @@ class InitialPage extends StatelessWidget {
               ButtonCustom(
                 label: 'DAFTAR JADI MITRA',
                 type: ButtonType.outline,
-                onTap: () {},
+                onTap: () => context.goNamed(Routes.signup),
               ),
               const SizedBox(height: 24),
 
