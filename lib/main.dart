@@ -2,11 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '/bloc/auth/auth_bloc.dart';
 import '/cubit/navigation_cubit.dart';
 import '/config/app_color.dart';
 import '/routes/router.dart';
+import '/widgets/custom_datepicker_widget.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -17,13 +19,16 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => AuthBloc()),
-        BlocProvider(create: (_) => NavigationCubit()),
-      ],
-      child: const MyApp(),
+  initializeDateFormatting('id', null).then(
+    (_) => runApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => DateTimePickerCubit()),
+          BlocProvider(create: (_) => AuthBloc()),
+          BlocProvider(create: (_) => NavigationCubit()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }
