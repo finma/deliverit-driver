@@ -1,4 +1,6 @@
+import 'package:deliverit_driver/routes/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '/config/app_asset.dart';
 import '/widgets/custom_button_widget.dart';
@@ -60,7 +62,7 @@ class InitialPage extends StatelessWidget {
 
               ButtonCustom(
                 label: 'MASUK',
-                onTap: () {},
+                onTap: () => context.pushNamed(Routes.signin),
               ),
               const SizedBox(height: 16),
 
