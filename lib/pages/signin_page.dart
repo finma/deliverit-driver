@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
+import '/bloc/auth/auth_bloc.dart';
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
 import '/cubit/switch_cubit.dart';
@@ -10,6 +11,7 @@ import '/routes/router.dart';
 import '/widgets/custom_button_widget.dart';
 import '/widgets/custom_text_form_field_widget.dart';
 
+// ignore: must_be_immutable
 class SignInPage extends StatelessWidget {
   SignInPage({super.key});
 
@@ -21,6 +23,8 @@ class SignInPage extends StatelessWidget {
   final SwitchCubit _switchCubit = SwitchCubit(false);
 
   final _formKey = GlobalKey<FormState>();
+
+  late bool _toastDisplayed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -120,54 +124,49 @@ class SignInPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    ButtonCustom(
-                      label: 'MASUK',
-                      onTap: () {
-                        if (_formKey.currentState!.validate()) {}
+                    BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        // Go to home page when login success
+                        if (state is AuthStateAuthenticated &&
+                            !_toastDisplayed) {
+                          Fluttertoast.showToast(
+                            msg: 'Berhasil masuk',
+                            toastLength: Toast.LENGTH_LONG,
+                            timeInSecForIosWeb: 3,
+                          );
+
+                          _toastDisplayed = true;
+                          context.goNamed(Routes.home);
+                        }
+
+                        if (state is AuthStateError) {
+                          // debugPrint('Error: ${state.message}');
+                          Fluttertoast.showToast(
+                            msg: state.message,
+                            toastLength: Toast.LENGTH_LONG,
+                            timeInSecForIosWeb: 3,
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        final isLoading = state is AuthStateLoading;
+
+                        return ButtonCustom(
+                          label: 'MASUK',
+                          isLoading: isLoading,
+                          onTap: () {
+                            if (_formKey.currentState!.validate()) {
+                              context.read<AuthBloc>().add(
+                                    AuthEventLogin(
+                                      email: emailController.text,
+                                      password: passwordController.text,
+                                    ),
+                                  );
+                            }
+                          },
+                        );
                       },
                     ),
-
-                    // BlocConsumer<AuthBloc, AuthState>(
-                    //   listener: (context, state) {
-                    //     // Go to home page when login success
-                    //     if (state is AuthStateAuthenticated) {
-                    //       Fluttertoast.showToast(
-                    //         msg: 'Berhasil masuk',
-                    //         toastLength: Toast.LENGTH_LONG,
-                    //         timeInSecForIosWeb: 3,
-                    //       );
-
-                    //       context.goNamed(Routes.home);
-                    //     }
-
-                    //     if (state is AuthStateError) {
-                    //       // debugPrint('Error: ${state.message}');
-                    //       Fluttertoast.showToast(
-                    //         msg: state.message,
-                    //         toastLength: Toast.LENGTH_LONG,
-                    //         timeInSecForIosWeb: 3,
-                    //       );
-                    //     }
-                    //   },
-                    //   builder: (context, state) {
-                    //     final isLoading = state is AuthStateLoading;
-
-                    //     return ButtonCustom(
-                    //       label: 'MASUK',
-                    //       isLoading: isLoading,
-                    //       onTap: () {
-                    //         if (_formKey.currentState!.validate()) {
-                    //           context.read<AuthBloc>().add(
-                    //                 AuthEventLogin(
-                    //                   email: emailController.text,
-                    //                   password: passwordController.text,
-                    //                 ),
-                    //               );
-                    //         }
-                    //       },
-                    //     );
-                    //   },
-                    // ),
                   ],
                 ),
               ),
