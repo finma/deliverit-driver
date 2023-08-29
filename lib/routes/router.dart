@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '/pages/home/home_page.dart';
+import '/pages/initial_page.dart';
 
 part 'route_names.dart';
 
@@ -10,6 +11,11 @@ final router = GoRouter(
       path: '/',
       name: Routes.home,
       builder: (context, state) => HomePage(),
+    ),
+    GoRoute(
+      path: '/initial-page',
+      name: Routes.initialPage,
+      builder: (context, state) => InitialPage(),
     ),
   ],
 );
