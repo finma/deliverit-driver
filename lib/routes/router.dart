@@ -17,11 +17,13 @@ final router = GoRouter(
       path: '/initial-page',
       name: Routes.initialPage,
       builder: (context, state) => InitialPage(),
-    ),
-    GoRoute(
-      path: '/signin',
-      name: Routes.signin,
-      builder: (context, state) => SignInPage(),
+      routes: [
+        GoRoute(
+          path: '/signin',
+          name: Routes.signin,
+          builder: (context, state) => SignInPage(),
+        ),
+      ],
     ),
   ],
 );
