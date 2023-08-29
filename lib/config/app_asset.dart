@@ -27,6 +27,7 @@ class AppAsset {
   static const iconQuestionMark = 'assets/images/icon_question_mark.png';
   static const iconSetting = 'assets/images/icon_setting.png';
   static const iconStar = 'assets/images/icon_star.png';
+  static const iconTag = 'assets/images/icon_tag.png';
   static const iconTruck = 'assets/images/icon_truck.png';
   static const iconWallet = 'assets/images/icon_wallet.png';
   static const logoDeliverit = 'assets/images/logo_deliverit.png';
