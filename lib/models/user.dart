@@ -4,7 +4,9 @@ class User {
   late String id;
   late String email;
   late String name;
-  late int phoneNumber;
+  late String address;
+  late String birthDate;
+  late String phoneNumber;
 
   User({
     required this.id,
@@ -22,6 +24,8 @@ class User {
       email = data['email'];
       name = data['name'];
       phoneNumber = data['phoneNumber'];
+      address = data['address'];
+      birthDate = data['birthDate'];
     }
   }
 }
