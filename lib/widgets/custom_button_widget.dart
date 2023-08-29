@@ -11,6 +11,8 @@ class ButtonCustom extends StatelessWidget {
     this.isExpanded = true,
     this.type = ButtonType.primary,
     this.icon,
+    this.isDisabled = false,
+    this.isLoading = false,
   }) : super(key: key);
 
   final String label;
@@ -18,6 +20,8 @@ class ButtonCustom extends StatelessWidget {
   final bool isExpanded;
   final ButtonType type;
   final Icon? icon;
+  final bool isDisabled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +59,22 @@ class ButtonCustom extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Visibility(
+                visible: isLoading,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(
+                        color: textColor,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
               Visibility(
                 visible: icon != null,
                 child: Row(
