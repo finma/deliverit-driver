@@ -95,6 +95,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           'name': event.name,
           'email': event.email,
           'phoneNumber': event.phoneNumber,
+          'address': event.address,
+          'birthDate': event.birthDate,
         };
 
         await driverRef.child(response.user!.uid).set(userData);
