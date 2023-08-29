@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '/bloc/bloc.dart';
 import '/pages/home/home_page.dart';
 import '/pages/initial_page.dart';
+import '/pages/select_mitra_page.dart';
 import '/pages/signin_page.dart';
 import '/pages/signup_page.dart';
 
@@ -45,6 +46,11 @@ final router = GoRouter(
           path: 'signup',
           name: Routes.signup,
           builder: (context, state) => SignUpPage(),
+        ),
+        GoRoute(
+          path: 'select-mitra',
+          name: Routes.selectMitra,
+          builder: (context, state) => SelectMitraPage(),
         ),
       ],
     ),

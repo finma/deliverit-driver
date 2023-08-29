@@ -205,7 +205,7 @@ class SignUpPage extends StatelessWidget {
                           // TODO: OTP not implemented yet, so go to home page
                           // context.goNamed(Routes.otp);
                           _toastDisplayed = true;
-                          context.goNamed(Routes.home);
+                          context.goNamed(Routes.selectMitra);
                         }
                       },
                       builder: (context, state) {
@@ -216,16 +216,6 @@ class SignUpPage extends StatelessWidget {
                           isLoading: isLoading,
                           onTap: () {
                             if (_formKey.currentState!.validate()) {
-                              debugPrint('name: ${nameController.text}');
-                              debugPrint('email: ${emailController.text}');
-                              debugPrint(
-                                  'phoneNumber: ${phoneNumberController.text}');
-                              debugPrint('address: ${addressController.text}');
-                              debugPrint(
-                                  'birtday: ${birthDateController.text}');
-                              debugPrint(
-                                  'password: ${passwordController.text}');
-
                               context.read<AuthBloc>().add(
                                     AuthEventRegister(
                                       name: nameController.text.trim(),
