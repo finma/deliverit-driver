@@ -4,13 +4,13 @@ class AppFormat {
   static String date(String stringDate) {
     // 2023-12-31
     DateTime date = DateTime.parse(stringDate);
-    return DateFormat('dd MMMM yyyy').format(date); // 31 Desember 2023
+    return DateFormat('dd MMMM yyyy', 'id').format(date); // 31 Desember 2023
   }
 
   static String dateMonth(String stringDate) {
     // 2023-12-31
     DateTime date = DateTime.parse(stringDate);
-    return DateFormat('dd MMMM').format(date); // 31 Desember
+    return DateFormat('dd MMMM', 'id').format(date); // 31 Desember
   }
 
   static String currency(double number) {
