@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>416813571494-p968038bc1nf6q4t8cgivpsvm219rmbq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.416813571494-p968038bc1nf6q4t8cgivpsvm219rmbq</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAb0VVTubNOlT-M8p4L5FyZnJoR9unOnxs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>416813571494</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.finma.deliveritdriver.deliveritDriver</string>
+	<key>PROJECT_ID</key>
+	<string>deliverit-394707</string>
+	<key>STORAGE_BUCKET</key>
+	<string>deliverit-394707.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:416813571494:ios:cac3c0ed3da790250e8367</string>
+	<key>DATABASE_URL</key>
+	<string>https://deliverit-394707-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>

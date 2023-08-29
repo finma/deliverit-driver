@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "416813571494",
+    "firebase_url": "https://deliverit-394707-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "deliverit-394707",
+    "storage_bucket": "deliverit-394707.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416813571494:android:247bf10c4fcf0b550e8367",
+        "android_client_info": {
+          "package_name": "com.finma.deliverit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416813571494-v5tlu11f09305n1dhtsv93vlul0aak8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpG4daPlZ15RtFePznrDoobeRUralTbx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "416813571494-v5tlu11f09305n1dhtsv93vlul0aak8r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "416813571494-f0t1kouifr0fqhul3ahkc7pmkmftgvs0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.deliverit"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416813571494:android:aec538060b3f326d0e8367",
+        "android_client_info": {
+          "package_name": "com.finma.deliveritdriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416813571494-v5tlu11f09305n1dhtsv93vlul0aak8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpG4daPlZ15RtFePznrDoobeRUralTbx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "416813571494-v5tlu11f09305n1dhtsv93vlul0aak8r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "416813571494-f0t1kouifr0fqhul3ahkc7pmkmftgvs0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.deliverit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
