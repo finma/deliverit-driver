@@ -31,6 +31,7 @@ class AppAsset {
   static const iconWallet = 'assets/images/icon_wallet.png';
   static const logoDeliverit = 'assets/images/logo_deliverit.png';
   static const logoDeliveritText = 'assets/images/logo_deliverit_text.png';
+  static const logoDeliveritText2 = 'assets/images/logo_deliverit_text_2.png';
   static const logoGoogle = 'assets/images/logo_google.png';
   static const profile = 'assets/images/profile.jpg';
 }
