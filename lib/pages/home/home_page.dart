@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import '/cubit/navigation_cubit.dart';
+import '/bloc/bloc.dart';
+import '/cubit/cubit.dart';
 import '/config/app_color.dart';
 import '/pages/home/chat_page.dart';
 import '/pages/home/history_page.dart';
 import '/pages/home/home_screen.dart';
 import '/pages/home/wallet_page.dart';
+import '/routes/router.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
   final List<Widget> screens = [
-    const HomeScreen(),
+    HomeScreen(),
     const WalletPage(),
     const HistoryPage(),
     const ChatPage(),
@@ -31,6 +33,14 @@ class HomePage extends StatelessWidget {
           },
         ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     context.read<AuthBloc>().add(AuthEventLogout());
+      //     context.goNamed(Routes.initialPage);
+      //   },
+      //   backgroundColor: AppColor.primary,
+      //   child: const Icon(Icons.logout_rounded),
+      // ),
       bottomNavigationBar: const BottomAppBarWidget(),
     );
   }
