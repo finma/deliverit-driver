@@ -22,9 +22,10 @@ Future<void> main() async {
     (_) => runApp(
       MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => DateTimePickerCubit()),
           BlocProvider(create: (_) => AuthBloc()),
+          BlocProvider(create: (_) => DateTimePickerCubit()),
           BlocProvider(create: (_) => NavigationCubit()),
+          BlocProvider(create: (_) => UploadFileCubit()),
           BlocProvider(create: (_) => VehicleCubit()),
         ],
         child: const MyApp(),
