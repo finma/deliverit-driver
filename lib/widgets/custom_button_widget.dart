@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '/config/app_color.dart';
 
 enum ButtonType { primary, secondary, outline }
@@ -25,11 +26,13 @@ class ButtonCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = type == ButtonType.primary
-        ? AppColor.primary
-        : type == ButtonType.secondary
-            ? Colors.white
-            : Colors.transparent;
+    Color backgroundColor = isDisabled
+        ? Colors.grey
+        : type == ButtonType.primary
+            ? AppColor.primary
+            : type == ButtonType.secondary
+                ? Colors.white
+                : Colors.transparent;
     Color borderColor =
         type == ButtonType.outline ? AppColor.primary : Colors.transparent;
     Color textColor =
@@ -40,7 +43,7 @@ class ButtonCustom extends StatelessWidget {
       color: backgroundColor,
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: onTap,
+        onTap: isDisabled ? null : onTap,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
