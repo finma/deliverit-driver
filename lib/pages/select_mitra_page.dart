@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '/bloc/bloc.dart';
+import '/cubit/cubit.dart';
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
-import '/cubit/state_cubit.dart';
 import '/data/vehicle.dart';
 import '/models/vehicle.dart';
+import '/routes/router.dart';
 import '/widgets/custom_button_widget.dart';
 
 class SelectMitraPage extends StatelessWidget {
@@ -16,6 +17,8 @@ class SelectMitraPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    VehicleCubit vehicleCubit = context.read<VehicleCubit>();
+
     return Scaffold(
       appBar: AppBar(
         title: Image.asset(AppAsset.logoDeliveritText2, width: 90),
@@ -45,9 +48,21 @@ class SelectMitraPage extends StatelessWidget {
             const Divider(thickness: 1.5, height: 40),
             _buildListVehicles(context),
             const SizedBox(height: 32),
-            ButtonCustom(
-              label: 'LANJUTKAN',
-              onTap: () {},
+            BlocBuilder<StateCubit<int>, int>(
+              bloc: selectVehicle,
+              builder: (context, state) {
+                return ButtonCustom(
+                  label: 'LANJUTKAN',
+                  isDisabled: vehicleCubit.state == null && state == 0,
+                  onTap: () {
+                    vehicleCubit.setSelectedValue(
+                      vehicles.firstWhere(
+                          (vehicle) => vehicle.id == selectVehicle.state),
+                    );
+                    context.goNamed(Routes.uploadFile);
+                  },
+                );
+              },
             )
           ],
         ),
@@ -56,6 +71,8 @@ class SelectMitraPage extends StatelessWidget {
   }
 
   SizedBox _buildListVehicles(BuildContext context) {
+    VehicleCubit vehicleCubit = context.read<VehicleCubit>();
+
     return SizedBox(
       // padding: const EdgeInsets.all(16),
       child: ListView.separated(
@@ -73,6 +90,7 @@ class SelectMitraPage extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 selectVehicle.setSelectedValue(vehicle.id);
+                vehicleCubit.setSelectedValue(vehicle);
               },
               borderRadius: BorderRadius.circular(24),
               child: BlocBuilder<StateCubit<int>, int>(
@@ -84,7 +102,8 @@ class SelectMitraPage extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: value == vehicle.id
+                            color: value == vehicle.id ||
+                                    vehicle == vehicleCubit.state
                                 ? AppColor.primary
                                 : Colors.transparent,
                             width: 1.5,
@@ -119,7 +138,7 @@ class SelectMitraPage extends StatelessWidget {
                       ),
 
                       // * CHIP
-                      if (value == vehicle.id)
+                      if (value == vehicle.id || vehicle == vehicleCubit.state)
                         const Positioned(
                           top: 2,
                           right: 8,
