@@ -7,6 +7,7 @@ import '/pages/initial_page.dart';
 import '/pages/select_mitra_page.dart';
 import '/pages/signin_page.dart';
 import '/pages/signup_page.dart';
+import '/pages/upload_file_page.dart';
 
 part 'route_names.dart';
 
@@ -51,6 +52,13 @@ final router = GoRouter(
           path: 'select-mitra',
           name: Routes.selectMitra,
           builder: (context, state) => SelectMitraPage(),
+          routes: [
+            GoRoute(
+              path: 'upload-file',
+              name: Routes.uploadFile,
+              builder: (context, state) => UploadFilePage(),
+            ),
+          ],
         ),
       ],
     ),
