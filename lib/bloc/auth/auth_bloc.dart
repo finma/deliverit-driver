@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '/config/firebase.dart';
 import '/models/user.dart';
@@ -22,6 +23,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _authEventLogin(AuthEventLogin event, Emitter<AuthState> emit) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     try {
       emit(AuthStateLoading());
 
@@ -39,6 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // print('user: ${user.snapshot.key}');
 
         if (user.snapshot.value != null) {
+          prefs.setString('userId', user.snapshot.key!);
           emit(AuthStateAuthenticated(user: User.fromSnapshot(user.snapshot)));
         } else {
           auth.signOut();
@@ -80,6 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _authEventRegister(
       AuthEventRegister event, Emitter<AuthState> emit) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       emit(AuthStateLoading());
 
@@ -104,6 +109,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final DatabaseEvent user =
             await driverRef.child(response.user!.uid).once();
 
+        prefs.setString('userId', user.snapshot.key!);
         emit(AuthStateAuthenticated(user: User.fromSnapshot(user.snapshot)));
       } else {
         emit(AuthStateError('Sign Up Failed'));
@@ -126,11 +132,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _authEventLogout(AuthEventLogout event, Emitter<AuthState> emit) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       emit(AuthStateLoading());
 
       await auth.signOut();
 
+      prefs.remove('userId');
       emit(AuthStateUnauthenticated());
     } on FirebaseAuthException catch (e) {
       emit(AuthStateError(e.message.toString()));
