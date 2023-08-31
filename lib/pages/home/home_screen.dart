@@ -24,6 +24,7 @@ class HomeScreen extends StatelessWidget {
   // * CURRENT LOCATION
   Position? currentLocation;
   Geolocator geoLocator = Geolocator();
+  CameraPosition? myLocation;
 
   StateCubit<bool> isDriverAvailable = StateCubit(false);
 
@@ -34,6 +35,19 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DriverCubit driverCubit = context.read<DriverCubit>();
+
+    // * SET INITIAL CAMERA POSITION
+    if (driverCubit.state.currentPosition != null) {
+      myLocation = CameraPosition(
+        target: LatLng(
+          driverCubit.state.currentPosition!.latitude,
+          driverCubit.state.currentPosition!.longitude,
+        ),
+        zoom: 16,
+      );
+    }
+
     // * FUNCTION TO GET CURRENT LOCATION
     void locatePosition() async {
       bool serviceEnabled;
@@ -65,6 +79,10 @@ class HomeScreen extends StatelessWidget {
       );
       currentLocation = position;
 
+      driverCubit.setValue(
+        currentPosition: currentLocation,
+      );
+
       // debugPrint('location: $position');
 
       // * MOVE CAMERA TO CURRENT LOCATION
@@ -83,7 +101,7 @@ class HomeScreen extends StatelessWidget {
             GoogleMap(
               mapType: MapType.normal,
               myLocationButtonEnabled: true,
-              initialCameraPosition: initialCameraPosition,
+              initialCameraPosition: myLocation ?? initialCameraPosition,
               myLocationEnabled: true,
               compassEnabled: true,
               zoomControlsEnabled: false,
