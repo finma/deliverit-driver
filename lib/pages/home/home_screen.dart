@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -14,11 +15,7 @@ import '/cubit/cubit.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
-  // * CONTROLLER GOOGLE MAP
-  final Completer<GoogleMapController> _controllerGoogleMap =
-      Completer<GoogleMapController>();
-  late GoogleMapController newGoogleMapController;
-  // late StreamSubscription<Position> homeScreenStreamSubscription;
+  late StreamSubscription<Position> homeScreenStreamSubscription;
 
   // * CURRENT LOCATION
   Position? currentLocation;
@@ -33,6 +30,20 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AuthBloc auth = context.read<AuthBloc>();
+
+    // print('auth: ${auth.state.user.id}');
+
+    String userId = auth.state.user.id;
+    DatabaseReference rideRequestRef = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${auth.state.user.id}/newRide');
+
+    // * CONTROLLER GOOGLE MAP
+    final Completer<GoogleMapController> controllerGoogleMap =
+        Completer<GoogleMapController>();
+    late GoogleMapController newGoogleMapController;
+
     // * FUNCTION TO GET CURRENT LOCATION
     void locatePosition() async {
       bool serviceEnabled;
@@ -85,6 +96,33 @@ class HomeScreen extends StatelessWidget {
       // }
     }
 
+    void makeDriverOnlineNow() async {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      currentLocation = position;
+
+      Geofire.initialize('availableDrivers');
+      Geofire.setLocation(
+        userId,
+        currentLocation!.latitude,
+        currentLocation!.longitude,
+      );
+
+      rideRequestRef.onValue.listen((event) {});
+    }
+
+    void getLocationLiveUpdates() {
+      homeScreenStreamSubscription =
+          Geolocator.getPositionStream().listen((Position position) {
+        currentLocation = position;
+        Geofire.setLocation(userId, position.latitude, position.longitude);
+
+        LatLng latLng = LatLng(position.latitude, position.longitude);
+        newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
+      });
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -97,7 +135,7 @@ class HomeScreen extends StatelessWidget {
               compassEnabled: true,
               zoomControlsEnabled: false,
               onMapCreated: (controller) {
-                _controllerGoogleMap.complete(controller);
+                controllerGoogleMap.complete(controller);
                 newGoogleMapController = controller;
 
                 locatePosition();
@@ -111,7 +149,12 @@ class HomeScreen extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   _buildAvatar(),
-                  _buildOnlineOfflineDriver(),
+                  _buildOnlineOfflineDriver(
+                    makeDriverOnlineNow,
+                    getLocationLiveUpdates,
+                    userId,
+                    rideRequestRef,
+                  )
                 ],
               ),
             )
@@ -121,23 +164,46 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Positioned _buildOnlineOfflineDriver() {
+  Positioned _buildOnlineOfflineDriver(
+    void Function() makeDriverOnlineNow,
+    void Function() getLocationLiveUpdates,
+    String userId,
+    DatabaseReference rideRequestRef,
+  ) {
     return Positioned.fill(
       child: Align(
         alignment: Alignment.center,
         child: BlocBuilder<StateCubit<bool>, bool>(
           bloc: isDriverAvailable,
           builder: (context, status) {
-            print('status: $status');
             return Material(
               color: status ? Colors.green : Colors.white,
               borderRadius: BorderRadius.circular(100),
               child: InkWell(
                 onTap: () {
                   if (!status) {
+                    makeDriverOnlineNow();
+                    getLocationLiveUpdates();
                     isDriverAvailable.setSelectedValue(true);
+
+                    Fluttertoast.showToast(
+                      msg: 'Anda sedang online sekarang',
+                      toastLength: Toast.LENGTH_SHORT,
+                      timeInSecForIosWeb: 3,
+                    );
                   } else {
+                    Geofire.removeLocation(userId);
+                    rideRequestRef.onDisconnect();
+                    rideRequestRef.remove();
+                    homeScreenStreamSubscription.cancel();
+
                     isDriverAvailable.setSelectedValue(false);
+
+                    Fluttertoast.showToast(
+                      msg: 'Anda sedang offline sekarang',
+                      toastLength: Toast.LENGTH_SHORT,
+                      timeInSecForIosWeb: 3,
+                    );
                   }
                 },
                 borderRadius: BorderRadius.circular(100),
@@ -206,33 +272,4 @@ class HomeScreen extends StatelessWidget {
       ],
     );
   }
-
-  // void makeDriverOnlineNow(
-  //     {required DatabaseReference rideRequestRef,
-  //     required String userId}) async {
-  //   Position position = await Geolocator.getCurrentPosition(
-  //     desiredAccuracy: LocationAccuracy.high,
-  //   );
-  //   currentLocation = position;
-
-  //   Geofire.initialize('availableDrivers');
-  //   Geofire.setLocation(
-  //     userId,
-  //     currentLocation!.latitude,
-  //     currentLocation!.longitude,
-  //   );
-
-  //   rideRequestRef.onValue.listen((event) {});
-  // }
-
-  // void getLocationLiveUpdates({required String userId}) {
-  //   homeScreenStreamSubscription =
-  //       Geolocator.getPositionStream().listen((Position position) {
-  //     currentLocation = position;
-  //     Geofire.setLocation(userId, position.latitude, position.longitude);
-
-  //     LatLng latLng = LatLng(position.latitude, position.longitude);
-  //     newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
-  //   });
-  // }
 }
