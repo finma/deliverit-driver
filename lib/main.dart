@@ -24,6 +24,7 @@ Future<void> main() async {
         providers: [
           BlocProvider(create: (_) => AuthBloc()),
           BlocProvider(create: (_) => DateTimePickerCubit()),
+          BlocProvider(create: (_) => DriverCubit()),
           BlocProvider(create: (_) => NavigationCubit()),
           BlocProvider(create: (_) => UploadFileCubit()),
           BlocProvider(create: (_) => VehicleCubit()),
