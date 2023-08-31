@@ -16,8 +16,6 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   // * CONTROLLER GOOGLE MAP
-  final Completer<GoogleMapController> controllerGoogleMap =
-      Completer<GoogleMapController>();
   late GoogleMapController newGoogleMapController;
   late StreamSubscription<Position> homeScreenStreamSubscription;
 
@@ -36,6 +34,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DriverCubit driverCubit = context.read<DriverCubit>();
+
+    // * CONTROLLER GOOGLE MAP
+    final Completer<GoogleMapController> controllerGoogleMap =
+        Completer<GoogleMapController>();
 
     // * SET INITIAL CAMERA POSITION
     if (driverCubit.state.currentPosition != null) {
@@ -98,18 +100,26 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              myLocationButtonEnabled: true,
-              initialCameraPosition: myLocation ?? initialCameraPosition,
-              myLocationEnabled: true,
-              compassEnabled: true,
-              zoomControlsEnabled: false,
-              onMapCreated: (controller) {
-                controllerGoogleMap.complete(controller);
-                newGoogleMapController = controller;
+            BlocBuilder<DriverCubit, DriverState>(
+              builder: (context, state) {
+                if (state.currentPosition == null) {
+                  locatePosition();
+                }
 
-                locatePosition();
+                return GoogleMap(
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: true,
+                  initialCameraPosition: myLocation ?? initialCameraPosition,
+                  myLocationEnabled: true,
+                  compassEnabled: true,
+                  zoomControlsEnabled: false,
+                  onMapCreated: (controller) {
+                    controllerGoogleMap.complete(controller);
+                    newGoogleMapController = controller;
+
+                    // locatePosition();
+                  },
+                );
               },
             ),
 
