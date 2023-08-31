@@ -6,8 +6,8 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '/bloc/bloc.dart';
 import '/config/app_asset.dart';
 import '/cubit/cubit.dart';
 
@@ -15,6 +15,10 @@ import '/cubit/cubit.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
+  // * CONTROLLER GOOGLE MAP
+  final Completer<GoogleMapController> controllerGoogleMap =
+      Completer<GoogleMapController>();
+  late GoogleMapController newGoogleMapController;
   late StreamSubscription<Position> homeScreenStreamSubscription;
 
   // * CURRENT LOCATION
@@ -30,20 +34,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthBloc auth = context.read<AuthBloc>();
-
-    // print('auth: ${auth.state.user.id}');
-
-    String userId = auth.state.user.id;
-    DatabaseReference rideRequestRef = FirebaseDatabase.instance
-        .ref()
-        .child('drivers/${auth.state.user.id}/newRide');
-
-    // * CONTROLLER GOOGLE MAP
-    final Completer<GoogleMapController> controllerGoogleMap =
-        Completer<GoogleMapController>();
-    late GoogleMapController newGoogleMapController;
-
     // * FUNCTION TO GET CURRENT LOCATION
     void locatePosition() async {
       bool serviceEnabled;
@@ -84,43 +74,6 @@ class HomeScreen extends StatelessWidget {
           CameraPosition(target: latlngPosition, zoom: 16);
       newGoogleMapController
           .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-
-      // * GET CURRENT ADDRESS
-      // if (context.mounted) {
-      //   MapAddress address =
-      //       await GoogleMapService.searchCoordinateAddress(position);
-
-      //   // * ADD CURRENT ADDRESS AND POSITION TO CUBIT
-      //   deliverCubit.setPickUpAddress(address);
-      //   deliverCubit.addCurrentPosition(position);
-      // }
-    }
-
-    void makeDriverOnlineNow() async {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      currentLocation = position;
-
-      Geofire.initialize('availableDrivers');
-      Geofire.setLocation(
-        userId,
-        currentLocation!.latitude,
-        currentLocation!.longitude,
-      );
-
-      rideRequestRef.onValue.listen((event) {});
-    }
-
-    void getLocationLiveUpdates() {
-      homeScreenStreamSubscription =
-          Geolocator.getPositionStream().listen((Position position) {
-        currentLocation = position;
-        Geofire.setLocation(userId, position.latitude, position.longitude);
-
-        LatLng latLng = LatLng(position.latitude, position.longitude);
-        newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
-      });
     }
 
     return Scaffold(
@@ -149,12 +102,7 @@ class HomeScreen extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   _buildAvatar(),
-                  _buildOnlineOfflineDriver(
-                    makeDriverOnlineNow,
-                    getLocationLiveUpdates,
-                    userId,
-                    rideRequestRef,
-                  )
+                  _buildOnlineOfflineDriver(),
                 ],
               ),
             )
@@ -164,12 +112,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Positioned _buildOnlineOfflineDriver(
-    void Function() makeDriverOnlineNow,
-    void Function() getLocationLiveUpdates,
-    String userId,
-    DatabaseReference rideRequestRef,
-  ) {
+  Positioned _buildOnlineOfflineDriver() {
     return Positioned.fill(
       child: Align(
         alignment: Alignment.center,
@@ -181,30 +124,7 @@ class HomeScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
               child: InkWell(
                 onTap: () {
-                  if (!status) {
-                    makeDriverOnlineNow();
-                    getLocationLiveUpdates();
-                    isDriverAvailable.setSelectedValue(true);
-
-                    Fluttertoast.showToast(
-                      msg: 'Anda sedang online sekarang',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 3,
-                    );
-                  } else {
-                    Geofire.removeLocation(userId);
-                    rideRequestRef.onDisconnect();
-                    rideRequestRef.remove();
-                    homeScreenStreamSubscription.cancel();
-
-                    isDriverAvailable.setSelectedValue(false);
-
-                    Fluttertoast.showToast(
-                      msg: 'Anda sedang offline sekarang',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 3,
-                    );
-                  }
+                  !status ? setOnline() : setOffline();
                 },
                 borderRadius: BorderRadius.circular(100),
                 child: Container(
@@ -271,5 +191,75 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // * FUNCTION TO SET DRIVER ONLINE
+  void setOnline() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
+    makeDriverOnlineNow(userId!);
+    getLocationLiveUpdates(userId);
+    isDriverAvailable.setSelectedValue(true);
+
+    Fluttertoast.showToast(
+      msg: 'Anda sedang online sekarang',
+      toastLength: Toast.LENGTH_SHORT,
+      timeInSecForIosWeb: 3,
+    );
+  }
+
+  // * FUNCTION TO SET DRIVER OFFLINE
+  void setOffline() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+
+    DatabaseReference rideRequestRef =
+        FirebaseDatabase.instance.ref().child('drivers/$userId/newRide');
+
+    Geofire.removeLocation(userId!);
+    rideRequestRef.onDisconnect();
+    rideRequestRef.remove();
+    homeScreenStreamSubscription.cancel();
+
+    isDriverAvailable.setSelectedValue(false);
+
+    Fluttertoast.showToast(
+      msg: 'Anda sedang offline sekarang',
+      toastLength: Toast.LENGTH_SHORT,
+      timeInSecForIosWeb: 3,
+    );
+  }
+
+  //* SET LOCATION TO FIREBASE
+  void makeDriverOnlineNow(String userId) async {
+    DatabaseReference rideRequestRef =
+        FirebaseDatabase.instance.ref().child('drivers/$userId/newRide');
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    currentLocation = position;
+
+    Geofire.initialize('availableDrivers');
+    Geofire.setLocation(
+      userId,
+      currentLocation!.latitude,
+      currentLocation!.longitude,
+    );
+
+    rideRequestRef.onValue.listen((event) {});
+  }
+
+  //* GET LOCATION LIVE UPDATE
+  void getLocationLiveUpdates(String userId) {
+    homeScreenStreamSubscription =
+        Geolocator.getPositionStream().listen((Position position) {
+      currentLocation = position;
+      Geofire.setLocation(userId, position.latitude, position.longitude);
+
+      LatLng latLng = LatLng(position.latitude, position.longitude);
+      newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
+    });
   }
 }
