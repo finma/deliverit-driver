@@ -9,7 +9,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/config/app_asset.dart';
+import '/config/firebase.dart';
+import '/config/map_config.dart';
 import '/cubit/cubit.dart';
+import '/models/driver.dart';
 import '/services/notification.dart';
 
 // ignore: must_be_immutable
@@ -289,6 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
       currentLocation!.longitude,
     );
 
+    rideRequestRef.set('searching');
     rideRequestRef.onValue.listen((event) {});
   }
 
@@ -304,9 +308,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void getCurrentDriverInfo() {
+  void getCurrentDriverInfo() async {
     PushNotificationService pushNotificationService = PushNotificationService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    pushNotificationService.initNotifications(context);
+    final userId = prefs.getString('userId');
+
+    DatabaseEvent result = await driverRef.child(userId!).once();
+
+    // print(result.snapshot.value.toString());
+
+    if (result.snapshot.value != null) {
+      driverInformation = Driver.fromSnapshot(result.snapshot);
+    }
+
+    if (context.mounted) {
+      pushNotificationService.initNotifications(context);
+    }
   }
 }
