@@ -13,12 +13,12 @@ class Vehicle {
     required this.price,
   });
 
-  factory Vehicle.fromJson(Map<String, dynamic> json) => Vehicle(
+  factory Vehicle.fromJson(Map<dynamic, dynamic> json) => Vehicle(
         id: json["id"],
         name: json["name"],
         image: json["image"],
-        maxWeight: json["max_weight"],
-        price: json["price"],
+        maxWeight: double.parse(json["max_weight"].toString()),
+        price: double.parse(json["price"].toString()),
       );
 
   Map<String, dynamic> toJson() => {
