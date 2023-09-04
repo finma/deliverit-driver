@@ -10,11 +10,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '/config/app_asset.dart';
 import '/cubit/cubit.dart';
+import '/services/notification.dart';
 
 // ignore: must_be_immutable
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
+  static const CameraPosition initialCameraPosition = CameraPosition(
+    target: LatLng(-7.319563, 108.202972),
+    zoom: 14.4746,
+  );
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   // * CONTROLLER GOOGLE MAP
   late GoogleMapController newGoogleMapController;
   late StreamSubscription<Position> homeScreenStreamSubscription;
@@ -26,10 +37,11 @@ class HomeScreen extends StatelessWidget {
 
   StateCubit<bool> isDriverAvailable = StateCubit(false);
 
-  static const CameraPosition initialCameraPosition = CameraPosition(
-    target: LatLng(-7.319563, 108.202972),
-    zoom: 14.4746,
-  );
+  @override
+  void initState() {
+    super.initState();
+    getCurrentDriverInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +121,8 @@ class HomeScreen extends StatelessWidget {
                 return GoogleMap(
                   mapType: MapType.normal,
                   myLocationButtonEnabled: true,
-                  initialCameraPosition: myLocation ?? initialCameraPosition,
+                  initialCameraPosition:
+                      myLocation ?? HomeScreen.initialCameraPosition,
                   myLocationEnabled: true,
                   compassEnabled: true,
                   zoomControlsEnabled: false,
@@ -289,5 +302,11 @@ class HomeScreen extends StatelessWidget {
       LatLng latLng = LatLng(position.latitude, position.longitude);
       newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
     });
+  }
+
+  void getCurrentDriverInfo() {
+    PushNotificationService pushNotificationService = PushNotificationService();
+
+    pushNotificationService.initNotifications(context);
   }
 }
