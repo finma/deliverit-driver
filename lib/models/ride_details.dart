@@ -14,6 +14,7 @@ class RideDetails {
   UserDelivery receiver;
   List<Payload> payloads;
   Vehicle vehicle;
+  int carrier;
 
   RideDetails({
     required this.rideRequestId,
@@ -26,6 +27,7 @@ class RideDetails {
     required this.vehicle,
     required this.distance,
     required this.totalPayment,
+    required this.carrier,
   });
 
   // to json
@@ -40,5 +42,6 @@ class RideDetails {
         "vehicle": vehicle.toJson(),
         "distance": distance,
         "total_payment": totalPayment,
+        "carrier": carrier,
       };
 }
