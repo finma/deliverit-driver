@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
+import '/config/app_format.dart';
 import '/config/app_symbol.dart';
 import '/data/payload.dart';
 import '/data/vehicle.dart';
@@ -41,9 +42,9 @@ class NotificationRidePage extends StatelessWidget {
           backgroundColor: Colors.white,
         ),
         bottomSheet: _buildBottomSheet(
-          distance: '15',
-          price: 50000,
-          payment: 'Cash',
+          distance: rideDetails.distance,
+          totalPayment: rideDetails.totalPayment,
+          paymentMethod: rideDetails.paymentMethod,
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(16, 4, 16, bottomSheetHeight + 16),
@@ -72,13 +73,13 @@ class NotificationRidePage extends StatelessWidget {
               const SizedBox(height: 24),
 
               //* Card List Payload
-              _buildCardListPayload(payloads: payloads),
+              _buildCardListPayload(payloads: rideDetails.payloads),
               const SizedBox(height: 24),
 
               //* Card Vehicle
               _buildCardVehicle(
-                vehicle: vehicles[0],
-                carrier: 1,
+                vehicle: rideDetails.vehicle,
+                carrier: rideDetails.carrier,
               ),
             ],
           ),
@@ -88,9 +89,9 @@ class NotificationRidePage extends StatelessWidget {
   }
 
   Container _buildBottomSheet({
-    required String distance,
-    required double price,
-    required String payment,
+    required double distance,
+    required double totalPayment,
+    required String paymentMethod,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -105,62 +106,65 @@ class NotificationRidePage extends StatelessWidget {
       child: IntrinsicHeight(
         child: Column(
           children: [
-            _buildItemSheet(title: 'Jarak', value: '$distance km'),
+            _buildItemSheet(
+                title: 'Jarak',
+                value: '${AppFormat.countDistance(distance)} km'),
             const SizedBox(height: 4),
-            _buildItemSheet(title: 'Tarif', value: 'Rp $price'),
+            _buildItemSheet(
+              title: 'Tarif',
+              value: AppFormat.currency(totalPayment),
+            ),
             const SizedBox(height: 4),
-            _buildItemSheet(title: 'Pembayaran', value: payment),
+            _buildItemSheet(
+              title: 'Pembayaran',
+              value: paymentMethod,
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                GestureDetector(
+                _buildButton(
+                  label: 'Tolak',
+                  color: AppColor.danger,
                   onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: AppColor.danger,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 36,
-                      vertical: 12,
-                    ),
-                    child: const Text(
-                      'Tolak',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
                 ),
-                GestureDetector(
+                _buildButton(
+                  label: 'Terima',
+                  color: AppColor.success,
                   onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: AppColor.success,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 36,
-                      vertical: 12,
-                    ),
-                    child: const Text(
-                      'Terima',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  GestureDetector _buildButton({
+    required String label,
+    required Color color,
+    required void Function()? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: color,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 36,
+          vertical: 12,
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
     );

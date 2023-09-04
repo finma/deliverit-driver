@@ -36,6 +36,7 @@ Future<void> handleBackgroundMessage(
     String paymentMethod = dataRideMap['paymentMethod'].toString();
     double distance = double.parse(dataRideMap['distance'].toString());
     double totalPayment = double.parse(dataRideMap['totalPayment'].toString());
+    int carrier = int.parse(dataRideMap['carrier'].toString());
 
     MapAddress pickup = MapAddress.fromJson((dataRideMap['pickup']));
     MapAddress dropoff = MapAddress.fromJson(dataRideMap['dropoff']);
@@ -65,6 +66,7 @@ Future<void> handleBackgroundMessage(
       dropoff: dropoff,
       payloads: payloads,
       vehicle: vehicle,
+      carrier: carrier,
     );
 
     // print('rideDetails: ${rideDetails.toJson()}');
@@ -177,61 +179,5 @@ class PushNotificationService {
         AndroidFlutterLocalNotificationsPlugin>();
 
     await platform?.createNotificationChannel(_androidChannel);
-  }
-
-  static void retrieveRideRequestInfo(
-      String rideRequestId, BuildContext context) async {
-    // print('rideRequestId: $rideRequestId');
-
-    final DatabaseEvent rideRequest =
-        await newRequestRef.child(rideRequestId).once();
-    final Map<dynamic, dynamic>? dataRide =
-        rideRequest.snapshot.value as Map<dynamic, dynamic>?;
-
-    if (dataRide != null) {
-      final Map<String, dynamic> dataRideMap =
-          Map<String, dynamic>.from(dataRide);
-
-      String paymentMethod = dataRideMap['paymentMethod'].toString();
-      double distance = double.parse(dataRideMap['distance'].toString());
-      double totalPayment =
-          double.parse(dataRideMap['totalPayment'].toString());
-
-      MapAddress pickup = MapAddress.fromJson((dataRideMap['pickup']));
-      MapAddress dropoff = MapAddress.fromJson(dataRideMap['dropoff']);
-
-      UserDelivery sender = UserDelivery.fromJson(dataRideMap['sender']);
-      UserDelivery receiver = UserDelivery.fromJson(dataRideMap['receiver']);
-
-      List<Payload> payloads = (dataRideMap['payloads'] as List).map((e) {
-        return Payload(
-          id: e['id'].toString(),
-          name: e['name'].toString(),
-          size: Payload.stringToSize(e['size']),
-          qty: e['qty'],
-        );
-      }).toList();
-
-      Vehicle vehicle = Vehicle.fromJson(dataRideMap['vehicle']);
-
-      RideDetails rideDetails = RideDetails(
-        rideRequestId: rideRequestId,
-        sender: sender,
-        receiver: receiver,
-        paymentMethod: paymentMethod,
-        distance: distance,
-        totalPayment: totalPayment,
-        pickup: pickup,
-        dropoff: dropoff,
-        payloads: payloads,
-        vehicle: vehicle,
-      );
-
-      // print('rideDetails: ${rideDetails.toJson()}');
-
-      if (context.mounted) {
-        context.goNamed(Routes.notificationRequest, extra: rideDetails);
-      }
-    }
   }
 }
