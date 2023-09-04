@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/bloc/bloc.dart';
 import '/pages/home/home_page.dart';
+import '/models/ride_details.dart';
+import '/pages/home/notification_request_page.dart';
 import '/pages/initial_page.dart';
 import '/pages/select_mitra_page.dart';
 import '/pages/signin_page.dart';
@@ -12,7 +15,10 @@ import '/pages/upload_file_page.dart';
 
 part 'route_names.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 final router = GoRouter(
+  navigatorKey: navigatorKey,
   routes: [
     GoRoute(
       path: '/',
@@ -38,6 +44,34 @@ final router = GoRouter(
 
         return null;
       },
+      routes: [
+        GoRoute(
+          path: 'notification-ride-request',
+          name: Routes.notificationRequest,
+          pageBuilder: (context, state) {
+            RideDetails rideDetails = state.extra as RideDetails;
+
+            return CustomTransitionPage(
+              key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 1000),
+              child: NotificationRidePage(rideDetails: rideDetails),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                final tween = Tween<double>(begin: 0.0, end: 1.0);
+                final curvedAnimation = CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.linearToEaseOut,
+                );
+
+                return ScaleTransition(
+                  scale: tween.animate(curvedAnimation),
+                  child: child,
+                );
+              },
+            );
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: '/initial-page',
