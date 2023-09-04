@@ -35,4 +35,5 @@ class AppAsset {
   static const logoDeliveritText2 = 'assets/images/logo_deliverit_text_2.png';
   static const logoGoogle = 'assets/images/logo_google.png';
   static const profile = 'assets/images/profile.jpg';
+  static const soundAlert = 'assets/sounds/alert.mp3';
 }
