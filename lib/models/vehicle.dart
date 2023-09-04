@@ -28,4 +28,11 @@ class Vehicle {
         "max_weight": maxWeight,
         "price": price,
       };
+
+  Vehicle.fromMap(Map<dynamic, dynamic> map)
+      : id = map['id'],
+        name = map['name'],
+        image = map['image'],
+        maxWeight = double.parse(map['max_weight'].toString()),
+        price = double.parse(map['price'].toString());
 }
