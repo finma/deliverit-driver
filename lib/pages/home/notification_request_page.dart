@@ -1,11 +1,16 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
 import '/config/app_format.dart';
 import '/config/app_symbol.dart';
+import '/config/firebase.dart';
 import '/config/map_config.dart';
+import '/cubit/cubit.dart';
 import '/data/payload.dart';
 import '/data/vehicle.dart';
 import '/models/payload.dart';
@@ -43,6 +48,7 @@ class NotificationRidePage extends StatelessWidget {
           backgroundColor: Colors.white,
         ),
         bottomSheet: _buildBottomSheet(
+          context,
           distance: rideDetails.distance,
           totalPayment: rideDetails.totalPayment,
           paymentMethod: rideDetails.paymentMethod,
@@ -89,7 +95,8 @@ class NotificationRidePage extends StatelessWidget {
     );
   }
 
-  Container _buildBottomSheet({
+  Container _buildBottomSheet(
+    BuildContext context, {
     required double distance,
     required double totalPayment,
     required String paymentMethod,
@@ -137,9 +144,9 @@ class NotificationRidePage extends StatelessWidget {
                   label: 'Terima',
                   color: AppColor.success,
                   onTap: () {
-                    audioPlayer.stop();
-
                     // todo: add function to accept ride request
+                    audioPlayer.stop();
+                    checkAvailibilityOfRide(context);
                   },
                 ),
               ],
@@ -506,5 +513,90 @@ class NotificationRidePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void checkAvailibilityOfRide(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId')!;
+    DatabaseReference rideRequestRef =
+        FirebaseDatabase.instance.ref().child('drivers/$userId/newRide');
+    DatabaseEvent response = await rideRequestRef.once();
+    String? theRideId;
+
+    if (response.snapshot.value != null) {
+      theRideId = response.snapshot.value.toString();
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Pesanan sudah tidak ada',
+        timeInSecForIosWeb: 2,
+      );
+    }
+
+    // print('theRideId: $theRideId');
+
+    if (theRideId == rideDetails.rideRequestId) {
+      rideRequestRef.set('accepted');
+      if (context.mounted) {
+        acceptRideRequest(context);
+      }
+    } else if (theRideId == 'canceled') {
+      Fluttertoast.showToast(
+        msg: 'Pesanan sudah dibatalkan',
+        timeInSecForIosWeb: 2,
+      );
+    } else if (theRideId == 'timeout') {
+      Fluttertoast.showToast(
+        msg: 'Pesanan sudah kadaluarsa',
+        timeInSecForIosWeb: 2,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Pesanan sudah tidak ada',
+        timeInSecForIosWeb: 2,
+      );
+    }
+  }
+
+  void acceptRideRequest(BuildContext context) {
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('status')
+        .set('accepted');
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('driverId')
+        .set(driverInformation.id);
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('driverName')
+        .set(driverInformation.name);
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('driverPhone')
+        .set(driverInformation.phoneNumber);
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('driverVehicle')
+        .set(driverInformation.vehicle!.toJson());
+
+    Map locMap = {
+      'latitude': context
+          .read<DriverCubit>()
+          .state
+          .currentPosition!
+          .latitude
+          .toString(),
+      'longitude': context
+          .read<DriverCubit>()
+          .state
+          .currentPosition!
+          .longitude
+          .toString(),
+    };
+
+    newRequestRef
+        .child(rideDetails.rideRequestId)
+        .child('driverLocation')
+        .set(locMap);
   }
 }
