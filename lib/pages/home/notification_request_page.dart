@@ -5,6 +5,7 @@ import '/config/app_asset.dart';
 import '/config/app_color.dart';
 import '/config/app_format.dart';
 import '/config/app_symbol.dart';
+import '/config/map_config.dart';
 import '/data/payload.dart';
 import '/data/vehicle.dart';
 import '/models/payload.dart';
@@ -126,12 +127,20 @@ class NotificationRidePage extends StatelessWidget {
                 _buildButton(
                   label: 'Tolak',
                   color: AppColor.danger,
-                  onTap: () {},
+                  onTap: () {
+                    audioPlayer.stop();
+
+                    // todo: add function to reject ride request
+                  },
                 ),
                 _buildButton(
                   label: 'Terima',
                   color: AppColor.success,
-                  onTap: () {},
+                  onTap: () {
+                    audioPlayer.stop();
+
+                    // todo: add function to accept ride request
+                  },
                 ),
               ],
             ),

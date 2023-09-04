@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 
+import '/config/app_asset.dart';
+import '/config/map_config.dart';
 import '/models/map_address.dart';
 import '/models/payload.dart';
 import '/models/user_delivery.dart';
@@ -30,6 +33,13 @@ Future<void> handleBackgroundMessage(
       rideRequest.snapshot.value as Map<dynamic, dynamic>?;
 
   if (dataRide != null) {
+    audioPlayer.open(
+      Audio(AppAsset.soundAlert),
+      autoStart: true,
+      loopMode: LoopMode.playlist,
+      playInBackground: PlayInBackground.enabled,
+    );
+
     final Map<String, dynamic> dataRideMap =
         Map<String, dynamic>.from(dataRide);
 
