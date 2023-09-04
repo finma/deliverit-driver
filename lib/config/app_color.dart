@@ -6,4 +6,6 @@ class AppColor {
 
   static const gradient = Color(0xffF8D1D1);
   static const blue = Color(0xff02E9FE);
+  static const danger = Color(0xffDC3545);
+  static const success = Color(0xff5CB85C);
 }
