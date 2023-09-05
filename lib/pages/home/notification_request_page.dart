@@ -7,6 +7,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,7 @@ import '/config/map_config.dart';
 import '/cubit/cubit.dart';
 import '/data/payload.dart';
 import '/data/vehicle.dart';
+import '/helper/assistant_method.dart';
 import '/models/payload.dart';
 import '/models/ride_details.dart';
 import '/models/vehicle.dart';
@@ -41,8 +43,13 @@ class NotificationRidePage extends HookWidget {
     zoom: 14.4746,
   );
 
+  Geolocator geolocator = Geolocator();
+  late BitmapDescriptor animatingMarkerIcon;
+
   @override
   Widget build(BuildContext context) {
+    final driverCubit = context.read<DriverCubit>();
+
     //* show google map when ride request accepted
     final isShowGoogleMap = useState(false);
     final isDirectionLoaded = useState(false);
@@ -54,6 +61,7 @@ class NotificationRidePage extends HookWidget {
     final polylineSet = useState<Set<Polyline>>(<Polyline>{});
     final circleSet = useState<Set<Circle>>(<Circle>{});
     final polylineCoordinates = useState<List<LatLng>>(<LatLng>[]);
+    final myPosition = useState<Position?>(null);
 
     // * GET PLACE DIRECTION AND DRAW ROUTE ON MAP
     Future<void> getPlaceDirection(
@@ -164,6 +172,37 @@ class NotificationRidePage extends HookWidget {
       circleSet.value.add(dropOffCircle);
     }
 
+    // * CREATE MARKER ICON PICKUP ON MAP
+    createIconMarker(context);
+
+    // * RIDE LIVE LOCAITON UPDATES
+    void getRideLiveLocationUpdates() {
+      rideStreamSubscription =
+          Geolocator.getPositionStream().listen((Position position) {
+        currentLocation = position;
+        myPosition.value = position;
+        LatLng mPosition = LatLng(position.latitude, position.longitude);
+
+        Marker animatingMarker = Marker(
+          markerId: const MarkerId('animating'),
+          position: mPosition,
+          icon: animatingMarkerIcon,
+          infoWindow: const InfoWindow(title: 'Lokasi Anda'),
+        );
+
+        CameraPosition cameraPosition = CameraPosition(
+          target: mPosition,
+          zoom: 18.5,
+        );
+        newRideGoogleMapController
+            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+        markerSet.value
+            .removeWhere((marker) => marker.markerId.value == 'animating');
+        markerSet.value.add(animatingMarker);
+      });
+    }
+
     return WillPopScope(
       onWillPop: () async {
         // Cant go back
@@ -213,19 +252,24 @@ class NotificationRidePage extends HookWidget {
                   onMapCreated: (controller) async {
                     EasyLoading.show(status: 'Loading...');
 
-                    // print('onMapCreated');
                     controllerGoogleMap.complete(controller);
                     newRideGoogleMapController = controller;
 
                     var currentLatLng = LatLng(
-                        currentLocation!.latitude, currentLocation!.longitude);
-                    var pickupLatLng = LatLng(rideDetails.pickup.latitude!,
-                        rideDetails.pickup.longitude!);
+                      driverCubit.state.currentPosition!.latitude,
+                      driverCubit.state.currentPosition!.longitude,
+                    );
+                    var pickupLatLng = LatLng(
+                      rideDetails.pickup.latitude!,
+                      rideDetails.pickup.longitude!,
+                    );
 
                     await getPlaceDirection(currentLatLng, pickupLatLng);
 
-                    // print('finish getPlaceDirection: ${markerSet.value}');
+                    getRideLiveLocationUpdates();
+
                     EasyLoading.dismiss();
+
                     isDirectionLoaded.value = true;
                   },
                 )
@@ -717,11 +761,12 @@ class NotificationRidePage extends HookWidget {
       );
     }
 
-    // print('theRideId: $theRideId');
+    // print('debug console: theRideId $theRideId');
 
     if (theRideId == rideDetails.rideRequestId) {
       rideRequestRef.set('accepted');
       if (context.mounted) {
+        AssistentMethod.disabledHomeLiveLocation(userId);
         acceptRideRequest(context);
         isShowGoogleMap.value = true;
       }
@@ -784,5 +829,14 @@ class NotificationRidePage extends HookWidget {
         .child(rideDetails.rideRequestId)
         .child('driverLocation')
         .set(locMap);
+  }
+
+  void createIconMarker(BuildContext context) {
+    ImageConfiguration imageConfiguration =
+        createLocalImageConfiguration(context, size: const Size(2, 2));
+    BitmapDescriptor.fromAssetImage(imageConfiguration, AppAsset.iconPickup)
+        .then((value) {
+      animatingMarkerIcon = value;
+    });
   }
 }
