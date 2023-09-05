@@ -31,7 +31,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // * CONTROLLER GOOGLE MAP
   late GoogleMapController newGoogleMapController;
-  late StreamSubscription<Position> homeScreenStreamSubscription;
 
   // * CURRENT LOCATION
   Position? currentLocation;
@@ -264,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Geofire.removeLocation(userId!);
     rideRequestRef.onDisconnect();
     rideRequestRef.remove();
-    homeScreenStreamSubscription.cancel();
+    homeScreenStreamSubscription!.cancel();
 
     isDriverAvailable.setSelectedValue(false);
 
