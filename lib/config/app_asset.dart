@@ -22,6 +22,7 @@ class AppAsset {
   static const iconMessage = 'assets/images/icon_message.png';
   static const iconNotification = 'assets/images/icon_notification.png';
   static const iconPeople = 'assets/images/icon_people.png';
+  static const iconPickup = 'assets/images/icon_pickup.png';
   static const iconPoint = 'assets/images/icon_point.png';
   static const iconProfile = 'assets/images/icon_profile.png';
   static const iconQuestionMark = 'assets/images/icon_question_mark.png';
