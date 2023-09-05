@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
           secondary: AppColor.secondary,
         ),
       ),
+      builder: EasyLoading.init(),
       routerConfig: router,
     );
   }
