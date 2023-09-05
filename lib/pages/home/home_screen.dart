@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '/bloc/bloc.dart';
 import '/config/app_asset.dart';
 import '/config/firebase.dart';
 import '/config/map_config.dart';
@@ -238,29 +239,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // * FUNCTION TO SET DRIVER ONLINE
   void setOnline() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
+    final auth = context.read<AuthBloc>();
+    final userId = auth.state.user.id;
 
-    makeDriverOnlineNow(userId!);
+    makeDriverOnlineNow(userId);
     getLocationLiveUpdates(userId);
     isDriverAvailable.setSelectedValue(true);
 
     Fluttertoast.showToast(
       msg: 'Anda sedang online sekarang',
       toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 3,
+      timeInSecForIosWeb: 2,
     );
   }
 
   // * FUNCTION TO SET DRIVER OFFLINE
   void setOffline() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
+    final auth = context.read<AuthBloc>();
+    final userId = auth.state.user.id;
 
     DatabaseReference rideRequestRef =
         FirebaseDatabase.instance.ref().child('drivers/$userId/newRide');
 
-    Geofire.removeLocation(userId!);
+    Geofire.removeLocation(userId);
     rideRequestRef.onDisconnect();
     rideRequestRef.remove();
     homeScreenStreamSubscription!.cancel();
@@ -270,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Fluttertoast.showToast(
       msg: 'Anda sedang offline sekarang',
       toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 3,
+      timeInSecForIosWeb: 2,
     );
   }
 
@@ -314,8 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = prefs.getString('userId');
 
     DatabaseEvent result = await driverRef.child(userId!).once();
-
-    // print(result.snapshot.value.toString());
 
     if (result.snapshot.value != null) {
       driverInformation = Driver.fromSnapshot(result.snapshot);

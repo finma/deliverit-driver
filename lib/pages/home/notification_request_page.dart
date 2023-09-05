@@ -9,8 +9,8 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '/bloc/bloc.dart';
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
 import '/config/app_format.dart';
@@ -745,8 +745,9 @@ class NotificationRidePage extends HookWidget {
     BuildContext context,
     ValueNotifier<bool> isShowGoogleMap,
   ) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('userId')!;
+    final auth = context.read<AuthBloc>();
+    String userId = auth.state.user.id;
+
     DatabaseReference rideRequestRef =
         FirebaseDatabase.instance.ref().child('drivers/$userId/newRide');
     DatabaseEvent response = await rideRequestRef.once();
