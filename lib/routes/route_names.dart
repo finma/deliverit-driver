@@ -7,5 +7,6 @@ class Routes {
   static const String selectMitra = 'selectMitra';
   static const String signin = 'signin';
   static const String signup = 'signup';
+  static const String transactionDetails = 'transactionDetails';
   static const String uploadFile = 'uploadFile';
 }

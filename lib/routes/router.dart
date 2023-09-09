@@ -7,6 +7,7 @@ import '/bloc/bloc.dart';
 import '/pages/home/home_page.dart';
 import '/models/ride_details.dart';
 import '/pages/home/notification_request_page.dart';
+import '/pages/home/transaction_details_page.dart';
 import '/pages/initial_page.dart';
 import '/pages/select_mitra_page.dart';
 import '/pages/signin_page.dart';
@@ -71,6 +72,15 @@ final router = GoRouter(
             );
           },
         ),
+        GoRoute(
+          path: 'transaction-details',
+          name: Routes.transactionDetails,
+          builder: (context, state) {
+            RideDetails rideDetails = state.extra as RideDetails;
+
+            return TransactionDetailsPage(rideDetails: rideDetails);
+          },
+        )
       ],
     ),
     GoRoute(
