@@ -63,6 +63,8 @@ class NotificationRidePage extends HookWidget {
     final circleSet = useState<Set<Circle>>(<Circle>{});
     final polylineCoordinates = useState<List<LatLng>>(<LatLng>[]);
     final myPosition = useState<Position?>(null);
+    final status = useState('accepted');
+    final btnTitle = useState('Sampai di lokasi pengambilan');
 
     // * GET PLACE DIRECTION AND DRAW ROUTE ON MAP
     Future<void> getPlaceDirection(
@@ -262,16 +264,22 @@ class NotificationRidePage extends HookWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 3),
-                                const Text(
-                                  'Alamat pengambilan',
-                                  style: TextStyle(
+                                Text(
+                                  status.value != 'accepted' ||
+                                          status.value != 'arived_pickup'
+                                      ? 'Alamat tujuan'
+                                      : 'Alamat pengambilan',
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  rideDetails.pickup.placeName!,
+                                  status.value != 'accepted' ||
+                                          status.value != 'arived_pickup'
+                                      ? rideDetails.dropoff.placeName!
+                                      : rideDetails.pickup.placeName!,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
@@ -280,7 +288,12 @@ class NotificationRidePage extends HookWidget {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  rideDetails.pickup.placeFormattedAddress!,
+                                  status.value != 'accepted' ||
+                                          status.value != 'arived_pickup'
+                                      ? rideDetails
+                                          .dropoff.placeFormattedAddress!
+                                      : rideDetails
+                                          .pickup.placeFormattedAddress!,
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
@@ -304,11 +317,18 @@ class NotificationRidePage extends HookWidget {
                               children: [
                                 const SizedBox(height: 3),
                                 Text(
-                                  rideDetails.sender.note != null &&
-                                          rideDetails.sender.note != ''
-                                      ? rideDetails.sender.note!
-                                      : 'Tidak ada catatan',
-                                  // note  ?? 'Tidak ada catatan',
+                                  status.value != 'accepted' ||
+                                          status.value != 'arived_pickup'
+                                      ? rideDetails.sender.note != null &&
+                                              rideDetails.sender.note != ''
+                                          ? rideDetails.sender.note!
+                                          : 'Tidak ada catatan'
+                                      : rideDetails.receiver.note != null &&
+                                              rideDetails.receiver.note != ''
+                                          ? rideDetails.receiver.note!
+                                          : 'Tidak ada catatan',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
@@ -325,14 +345,13 @@ class NotificationRidePage extends HookWidget {
                 ),
                 const Divider(
                   thickness: 1,
-                  height: 24,
                   color: Colors.white,
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                   child: ActionSlider.standard(
-                    foregroundBorderRadius: BorderRadius.circular(15),
+                    foregroundBorderRadius: BorderRadius.circular(10),
                     backgroundBorderRadius: BorderRadius.circular(15),
                     icon: const Icon(
                       Icons.arrow_forward_ios_rounded,
@@ -359,12 +378,70 @@ class NotificationRidePage extends HookWidget {
                     ),
                     action: (controller) async {
                       controller.loading();
-                      await Future.delayed(const Duration(seconds: 3));
-                      controller.success();
+
+                      String rideRequestId = rideDetails.rideRequestId;
+                      LatLng pickupLatLng = LatLng(
+                        rideDetails.pickup.latitude!,
+                        rideDetails.pickup.longitude!,
+                      );
+
+                      LatLng dropoffLatLng = LatLng(
+                        rideDetails.dropoff.latitude!,
+                        rideDetails.dropoff.longitude!,
+                      );
+
+                      switch (status.value) {
+                        case 'accepted':
+                          status.value = 'arrived_pickup';
+                          btnTitle.value = 'Barang sudah dimuat';
+                          await getPlaceDirection(pickupLatLng, dropoffLatLng);
+                          break;
+
+                        case 'arrived_pickup':
+                          status.value = 'already_picked_up';
+                          btnTitle.value = 'Mulai perjalanan';
+                          break;
+
+                        case 'already_picked_up':
+                          status.value = 'onride';
+                          btnTitle.value = 'Sampai di lokasi tujuan';
+                          break;
+
+                        case 'onride':
+                          status.value = 'arrived_dropoff';
+                          btnTitle.value = 'Barang sudah diturunkan';
+                          break;
+
+                        case 'arrived_dropoff':
+                          status.value = 'delivered';
+                          btnTitle.value = 'Selesai antar';
+                          break;
+
+                        case 'delivered':
+                          status.value = 'completed';
+                          newRequestRef
+                              .child(rideRequestId)
+                              .child('fares')
+                              .set(rideDetails.totalPayment);
+                          rideStreamSubscription!.cancel();
+                          btnTitle.value = 'Selesai';
+                          controller.success();
+                          break;
+
+                        default:
+                          break;
+                      }
+
+                      newRequestRef
+                          .child(rideRequestId)
+                          .child('status')
+                          .set(status.value);
+                      await Future.delayed(const Duration(seconds: 2));
+                      controller.reset();
                     },
-                    child: const Text(
-                      'Sudah sampai lokasi pengambilan',
-                      style: TextStyle(
+                    child: Text(
+                      btnTitle.value,
+                      style: const TextStyle(
                         fontSize: 14,
                         color: AppColor.primary,
                         fontWeight: FontWeight.bold,
