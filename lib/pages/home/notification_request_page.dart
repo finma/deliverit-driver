@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:action_slider/action_slider.dart';
+import 'package:deliverit_driver/helper/mapkit_assistant.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -180,16 +181,26 @@ class NotificationRidePage extends HookWidget {
 
     // * RIDE LIVE LOCAITON UPDATES
     void getRideLiveLocationUpdates() {
+      LatLng oldPosition = const LatLng(0, 0);
+
       rideStreamSubscription =
           Geolocator.getPositionStream().listen((Position position) {
         currentLocation = position;
         myPosition.value = position;
         LatLng mPosition = LatLng(position.latitude, position.longitude);
 
+        double rot = MapKitAssistant.getMarkerRotation(
+          oldPosition.latitude,
+          oldPosition.longitude,
+          mPosition.latitude,
+          mPosition.longitude,
+        );
+
         Marker animatingMarker = Marker(
           markerId: const MarkerId('animating'),
           position: mPosition,
           icon: animatingMarkerIcon,
+          rotation: rot,
           infoWindow: const InfoWindow(title: 'Lokasi Anda'),
         );
 
