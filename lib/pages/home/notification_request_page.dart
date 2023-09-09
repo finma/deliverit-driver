@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:action_slider/action_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -225,6 +226,155 @@ class NotificationRidePage extends HookWidget {
             : null,
         bottomSheet: Visibility(
           visible: !isShowGoogleMap.value,
+          replacement: Container(
+            // padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            height: 340,
+            decoration: const BoxDecoration(
+              color: AppColor.primary,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Column(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 3),
+                                const Text(
+                                  'Alamat pengambilan',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  rideDetails.pickup.placeName!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  rideDetails.pickup.placeFormattedAddress!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.outlined_flag_rounded,
+                              color: Colors.white),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 3),
+                                Text(
+                                  rideDetails.sender.note != null &&
+                                          rideDetails.sender.note != ''
+                                      ? rideDetails.sender.note!
+                                      : 'Tidak ada catatan',
+                                  // note  ?? 'Tidak ada catatan',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(
+                  thickness: 1,
+                  height: 24,
+                  color: Colors.white,
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: ActionSlider.standard(
+                    foregroundBorderRadius: BorderRadius.circular(15),
+                    backgroundBorderRadius: BorderRadius.circular(15),
+                    icon: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                    successIcon: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                    ),
+                    sliderBehavior: SliderBehavior.stretch,
+                    loadingIcon: const SizedBox(
+                      width: 55,
+                      child: Center(
+                        child: SizedBox(
+                          width: 24.0,
+                          height: 24.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    action: (controller) async {
+                      controller.loading();
+                      await Future.delayed(const Duration(seconds: 3));
+                      controller.success();
+                    },
+                    child: const Text(
+                      'Sudah sampai lokasi pengambilan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColor.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           child: _buildBottomSheet(
             context,
             distance: rideDetails.distance,
