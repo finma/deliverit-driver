@@ -1,18 +1,24 @@
-import 'package:deliverit_driver/config/app_asset.dart';
-import 'package:deliverit_driver/config/app_color.dart';
-import 'package:deliverit_driver/models/ride_details.dart';
-import 'package:deliverit_driver/widgets/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class TransactionDetailsPage extends StatelessWidget {
-  final RideDetails? rideDetails;
+import '/config/app_asset.dart';
+import '/config/app_color.dart';
+import '/config/app_format.dart';
+import '/config/app_symbol.dart';
+import '/models/payload.dart';
+import '/models/ride_details.dart';
+import '/widgets/custom_button_widget.dart';
 
-  TransactionDetailsPage({super.key, this.rideDetails});
+class TransactionDetailsPage extends StatelessWidget {
+  final RideDetails rideDetails;
+
+  const TransactionDetailsPage({super.key, required this.rideDetails});
 
   @override
   Widget build(BuildContext context) {
+    final dateNow = DateTime.now();
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -21,6 +27,7 @@ class TransactionDetailsPage extends StatelessWidget {
             // mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(height: 32),
+              //* AVATAR
               Align(
                 alignment: Alignment.center,
                 child: Container(
@@ -45,28 +52,37 @@ class TransactionDetailsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              const Align(
+
+              //* TOTAL PAYMENT
+              Align(
                 alignment: Alignment.center,
                 child: Text(
-                  'Rp 222.000',
+                  AppFormat.currency(rideDetails.totalPayment),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Jl.Kona - Perum Cipta Graha Mandiri Blok C 108, Sukarindik, Kec.Bungursari, Tasikmalaya',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
+
+              //* DROPOFF ADDRESS
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  rideDetails.dropoff.placeFormattedAddress!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
               const Divider(thickness: 1, height: 24),
+
+              //* TRANSACTION DETAIL
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -82,19 +98,22 @@ class TransactionDetailsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _itemTransaction('Metode Pembayaran', 'Cash'),
+                    _itemTransaction(
+                        'Metode Pembayaran', rideDetails.paymentMethod),
                     const SizedBox(height: 16),
-                    _itemTransaction('Transportasi', 'Pickup'),
+                    _itemTransaction('Transportasi', rideDetails.vehicle.name),
                     const SizedBox(height: 16),
-                    _itemTransaction('Barang', 'Lemari dan meja'),
+                    _itemTransactionPayloads('Barang', rideDetails.payloads),
                     const SizedBox(height: 16),
-                    _itemTransaction('Pengangkut', '1'),
+                    _itemTransaction(
+                        'Pengangkut', rideDetails.carrier.toString()),
                     const SizedBox(height: 16),
                     _itemTransaction('Status', 'Selesai'),
                     const SizedBox(height: 16),
-                    _itemTransaction('Waktu', '11.44'),
+                    _itemTransaction('Waktu', AppFormat.hm(dateNow.toString())),
                     const SizedBox(height: 16),
-                    _itemTransaction('Tanggal', '17 Agustus 2023'),
+                    _itemTransaction(
+                        'Tanggal', AppFormat.date(dateNow.toString())),
                     const SizedBox(height: 16),
                     _itemTransaction(
                       'ID Transaksi',
@@ -113,16 +132,19 @@ class TransactionDetailsPage extends StatelessWidget {
               const Divider(thickness: 1, height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _itemTransaction('Jumlah', 'Rp 222.000'),
+                child: _itemTransaction(
+                    'Jumlah', AppFormat.currency(rideDetails.totalPayment)),
               ),
               const Divider(thickness: 1, height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _itemTransaction('Total', 'Rp 222.000', isBold: true),
+                child: _itemTransaction(
+                    'Total', AppFormat.currency(rideDetails.totalPayment),
+                    isBold: true),
               ),
-              const SizedBox(height: 32),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                 child: ButtonCustom(label: 'Selesai', onTap: () {}),
               ),
             ],
@@ -171,6 +193,52 @@ class TransactionDetailsPage extends StatelessWidget {
                     const Icon(Icons.copy, size: 18, color: AppColor.primary),
               ),
           ],
+        )
+      ],
+    );
+  }
+
+  Row _itemTransactionPayloads(
+    String title,
+    List<Payload> payloads,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: payloads.map((payload) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: payloads.length == 1 ? 0 : 8),
+              child: Row(
+                children: [
+                  Text(
+                    payload.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${AppSymbol.multiplication}${payload.qty}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         )
       ],
     );
