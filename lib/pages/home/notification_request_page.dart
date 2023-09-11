@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:action_slider/action_slider.dart';
-import 'package:deliverit_driver/helper/mapkit_assistant.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '/bloc/bloc.dart';
@@ -23,9 +23,11 @@ import '/cubit/cubit.dart';
 import '/data/payload.dart';
 import '/data/vehicle.dart';
 import '/helper/assistant_method.dart';
+import '/helper/mapkit_assistant.dart';
 import '/models/payload.dart';
 import '/models/ride_details.dart';
 import '/models/vehicle.dart';
+import '/routes/router.dart';
 import '/services/googlemap.dart';
 
 // ignore: must_be_immutable
@@ -437,6 +439,10 @@ class NotificationRidePage extends HookWidget {
                           rideStreamSubscription!.cancel();
                           btnTitle.value = 'Selesai';
                           controller.success();
+                          context.goNamed(
+                            Routes.transactionDetails,
+                            extra: rideDetails,
+                          );
                           break;
 
                         default:
