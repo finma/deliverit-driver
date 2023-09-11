@@ -19,6 +19,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverBlocState> {
       final DatabaseEvent res =
           await driverRef.child(event.userId).child('earnings').once();
 
+      //* If the driver has already earned some money, add it to the new earnings
       if (res.snapshot.value != null) {
         // var data = res.snapshot.value as Map<dynamic, dynamic>;
         double oldEarnings = double.parse(res.snapshot.value.toString());
@@ -29,6 +30,16 @@ class DriverBloc extends Bloc<DriverEvent, DriverBlocState> {
       } else {
         driverRef.child(event.userId).child('earnings').set(event.earnings);
       }
+
+      //* Add the ride request id to the driver's history
+      driverRef
+          .child(event.userId)
+          .child('history')
+          .child(event.rideRequestId)
+          .set(true);
+
+      //* Set the driver's status to 'searching'
+      driverRef.child(event.userId).child('newRide').set('searching');
 
       emit(DriverStateSuccess());
     } catch (e) {

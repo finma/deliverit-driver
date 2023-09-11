@@ -176,6 +176,7 @@ class TransactionDetailsPage extends StatelessWidget {
                       onTap: () => context.read<DriverBloc>().add(
                             DriverEventSetEarnings(
                               userId: auth.state.user.id,
+                              rideRequestId: rideDetails.rideRequestId,
                               earnings: rideDetails.totalPayment,
                             ),
                           ),
