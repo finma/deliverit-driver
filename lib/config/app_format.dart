@@ -13,6 +13,12 @@ class AppFormat {
     return DateFormat('dd MMMM', 'id').format(date); // 31 Desember
   }
 
+  static String hm(String stringDate) {
+    // 2023-12-31 12:00:00
+    DateTime date = DateTime.parse(stringDate);
+    return DateFormat.Hm().format(date); // 12:00
+  }
+
   static String currency(double number) {
     return NumberFormat.currency(
       locale: 'id_ID',
