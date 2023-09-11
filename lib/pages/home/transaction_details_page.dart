@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 
+import '/bloc/bloc.dart';
 import '/config/app_asset.dart';
 import '/config/app_color.dart';
 import '/config/app_format.dart';
 import '/config/app_symbol.dart';
+import '/helper/assistant_method.dart';
 import '/models/payload.dart';
 import '/models/ride_details.dart';
 import '/widgets/custom_button_widget.dart';
@@ -17,6 +20,8 @@ class TransactionDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.read<AuthBloc>();
+
     final dateNow = DateTime.now();
 
     return Scaffold(
@@ -145,7 +150,38 @@ class TransactionDetailsPage extends StatelessWidget {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-                child: ButtonCustom(label: 'Selesai', onTap: () {}),
+                child: BlocConsumer<DriverBloc, DriverBlocState>(
+                  listener: (context, state) {
+                    if (state is DriverStateError) {
+                      Fluttertoast.showToast(
+                        msg: state.message,
+                        timeInSecForIosWeb: 1,
+                      );
+                    } else if (state is DriverStateSuccess) {
+                      Fluttertoast.showToast(
+                        msg: 'Berhasil menyelesaikan pesanan',
+                        timeInSecForIosWeb: 1,
+                      );
+
+                      AssistentMethod.enabledHomeLiveLocation(
+                          auth.state.user.id);
+
+                      context.pop();
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonCustom(
+                      label: 'Selesai',
+                      isLoading: state is DriverStateLoading,
+                      onTap: () => context.read<DriverBloc>().add(
+                            DriverEventSetEarnings(
+                              userId: auth.state.user.id,
+                              earnings: rideDetails.totalPayment,
+                            ),
+                          ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
