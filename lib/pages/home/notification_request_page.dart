@@ -1020,16 +1020,25 @@ class NotificationRidePage extends HookWidget {
         msg: 'Pesanan sudah dibatalkan',
         timeInSecForIosWeb: 2,
       );
+      if (context.mounted) {
+        context.goNamed(Routes.home);
+      }
     } else if (theRideId == 'timeout') {
       Fluttertoast.showToast(
         msg: 'Pesanan sudah kadaluarsa',
         timeInSecForIosWeb: 2,
       );
+      if (context.mounted) {
+        context.goNamed(Routes.home);
+      }
     } else {
       Fluttertoast.showToast(
         msg: 'Pesanan sudah tidak ada',
         timeInSecForIosWeb: 2,
       );
+      if (context.mounted) {
+        context.goNamed(Routes.home);
+      }
     }
   }
 
